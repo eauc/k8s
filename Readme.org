@@ -1,0 +1,54 @@
+
+* Links
+
+Kubernetes
+- [[https://kubernetes.io/docs/concepts/containers/images/][images]]
+- [[https://kubernetes.io/docs/concepts/workloads/pods/][pods]]
+- [[https://kubernetes.io/docs/concepts/services-networking/service/][services]]
+- [[https://kubernetes.io/docs/concepts/storage/volumes/][volumes]]
+- [[https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/][namespaces]]
+- [[https://kubernetes.io/docs/concepts/workloads/controllers/deployment/][deployments]]
+- [[https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/][jobs]]
+- [[https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/][statefulsets]]
+- [[https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/][daemonsets]]
+- [[https://kubernetes.io/docs/concepts/configuration/overview/][configuration best practices]]
+
+KubeAdmin
+- [[https://kubernetes.io/docs/setup/independent/install-kubeadm/][installation guide]]
+- [[https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/][create cluster guide]]
+
+Calico pod network provides
+- [[https://docs.projectcalico.org/v3.2/getting-started/kubernetes/][getting started]]
+
+[[https://www.linux.com/blog/learn/chapter/Intro-to-Kubernetes/2017/5/set-cicd-pipeline-kubernetes-part-1-overview][CI/CD with kubernetes]]
+- [[https://github.com/kenzanlabs/kubernetes-ci-cd][Github repository]]
+
+* Installation notes
+
+VM configuration
+- use =VM Network= for network adapter
+- use manual MAC adress from =Perimetre d'exploitation= file
+
+Ubuntu 18.04 image
+- choose static IPv4 IP from =Perimetre d'exploitation= file
+
+Docker v18 since v17.03 recommended by kudeamin is not found in docker repos.
+
+Kudeadmin does not work with swap:
+#+BEGIN_SRC bash
+swapoff -a
+#+END_SRC
+- edit =/etc/fstab= to remove swap entry
+
+Kubeadmin install
+- followed [[https://kubernetes.io/docs/setup/independent/install-kubeadm/][installation guide]]
+- followed [[https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/][create cluster guide]]
+
+Calico install
+- kubeadmin cluster guide and calico getting started differs : the later install an additional etc-d cluster for calico
+- followed calico [[https://docs.projectcalico.org/v3.2/getting-started/kubernetes/][getting started]]
+#+BEGIN_SRC bash
+watch kubectl get pods --all-namespaces
+#+END_SRC
+- some pods in NodeLost state during setup ???
+- all pods running after ~1m
