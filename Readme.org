@@ -22,6 +22,7 @@ Calico pod network provides
 
 [[https://www.linux.com/blog/learn/chapter/Intro-to-Kubernetes/2017/5/set-cicd-pipeline-kubernetes-part-1-overview][CI/CD with kubernetes]]
 - [[https://github.com/kenzanlabs/kubernetes-ci-cd][Github repository]]
+- [[https://github.com/kubernetes/kubernetes/issues/33664#issuecomment-292895327][Force redeploy with same image tag]]
 
 * Installation notes
 
