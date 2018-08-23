@@ -24,6 +24,12 @@ Calico pod network provides
 - [[https://github.com/kenzanlabs/kubernetes-ci-cd][Github repository]]
 - [[https://github.com/kubernetes/kubernetes/issues/33664#issuecomment-292895327][Force redeploy with same image tag]]
 
+Packages
+- [[https://docs.helm.sh/using_helm][Helm]]
+
+Persistent volumes
+- [[https://docs.storageos.com/docs/introduction/overview][StorageOS]]
+
 * Installation notes
 
 VM configuration
@@ -53,3 +59,10 @@ watch kubectl get pods --all-namespaces
 #+END_SRC
 - some pods in NodeLost state during setup ???
 - all pods running after ~1m
+
+* Notes
+
+Forward local port to push on distant docker registry with HTTP:
+#+BEGIN_SRC bash
+ssh -L <local-port>:<registry-ip>:<registry-port> <registry-host>
+#+END_SRC
