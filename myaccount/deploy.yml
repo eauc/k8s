@@ -1,0 +1,29 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: myaccount-admin
+  labels:
+    app: myaccount
+    component: admin
+spec:
+  selector:
+    matchLabels:
+      app: myaccount
+      component: admin
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: myaccount
+        component: admin
+    spec:
+      containers:
+      - name: myaccount-admin
+        image: 127.0.0.1:30100/myaccount-admin:dev
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        env:
+        - name: CODE_VERSION
+          value: 31a7b74
