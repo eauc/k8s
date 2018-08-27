@@ -1,6 +1,9 @@
 
 * Links
 
+Docker:
+- [[https://docs.docker.com/registry/][Registry]]
+
 Kubernetes
 - [[https://kubernetes.io/docs/concepts/containers/images/][images]]
 - [[https://kubernetes.io/docs/concepts/workloads/pods/][pods]]
@@ -12,6 +15,7 @@ Kubernetes
 - [[https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/][statefulsets]]
 - [[https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/][daemonsets]]
 - [[https://kubernetes.io/docs/concepts/configuration/overview/][configuration best practices]]
+- [[https://docs.bitnami.com/kubernetes/how-to/configure-rbac-in-your-kubernetes-cluster/][RBAC config]]
 
 KubeAdmin
 - [[https://kubernetes.io/docs/setup/independent/install-kubeadm/][installation guide]]
@@ -24,15 +28,17 @@ Calico pod network provides
 - [[https://github.com/kenzanlabs/kubernetes-ci-cd][Github repository]]
 - [[https://github.com/kubernetes/kubernetes/issues/33664#issuecomment-292895327][Force redeploy with same image tag]]
 
-Packages
-- [[https://docs.helm.sh/using_helm][Helm]]
+Packages with Helm
+- [[https://docs.helm.sh/using_helm][Using Helm]]
+- [[https://docs.helm.sh/using_helm/#installing-helm][Installing Helm]]
 
 Persistent volumes
 - [[https://docs.storageos.com/docs/introduction/overview][StorageOS]]
 
 * Installation notes
 
-VM configuration
+** VM configuration
+
 - use =VM Network= for network adapter
 - use manual MAC adress from =Perimetre d'exploitation= file
 
@@ -41,7 +47,9 @@ Ubuntu 18.04 image
 
 Docker v18 since v17.03 recommended by kudeamin is not found in docker repos.
 
-Kudeadmin does not work with swap:
+** Kudeadmin
+
+Kubeadmin does not work with swap:
 #+BEGIN_SRC bash
 swapoff -a
 #+END_SRC
@@ -51,7 +59,8 @@ Kubeadmin install
 - followed [[https://kubernetes.io/docs/setup/independent/install-kubeadm/][installation guide]]
 - followed [[https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/][create cluster guide]]
 
-Calico install
+** Calico
+
 - kubeadmin cluster guide and calico getting started differs : the later install an additional etc-d cluster for calico
 - followed calico [[https://docs.projectcalico.org/v3.2/getting-started/kubernetes/][getting started]]
 #+BEGIN_SRC bash
@@ -59,6 +68,18 @@ watch kubectl get pods --all-namespaces
 #+END_SRC
 - some pods in NodeLost state during setup ???
 - all pods running after ~1m
+
+** Helm
+
+- tiller requires roles definitions in the RBAC system, apply [[./helm/rbac-config.yaml][rbac-config]] before helm-init
+- then call helm init with the ServiceAccount defined in RBAC config
+#+BEGIN_SRC bash
+helm init --service-account tiller
+#+END_SRC
+- if you already installed tiller and want to change this config afterwards:
+#+BEGIN_SRC bash
+helm init --service-account tiller --upgrade
+#+END_SRC
 
 * Notes
 
