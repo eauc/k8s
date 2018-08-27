@@ -91,6 +91,10 @@ helm init --service-account tiller --upgrade
 - [[https://stackoverflow.com/questions/34282704/can-a-pvc-be-bound-to-a-specific-pv][bind pv to a specific pvc]]
 - set rights for user 472:472 on pv directory =/data/grafana= otherwise grafana container dies when it can't create a subdirectory in it's volume :\
 
+** Nginx-Ingress
+
+[[https://medium.com/@maninder.bindra/using-nginx-ingress-controller-to-restrict-access-by-ip-ip-whitelisting-for-a-service-deployed-to-bd5c86dc66d6]]
+
 * Notes
 
 Forward local port to push on distant docker registry with HTTP:
