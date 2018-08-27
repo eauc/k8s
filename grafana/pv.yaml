@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  claimRef:
+    namespace: monitoring
+    name: grafana
+  hostPath:
+    path: "/data/grafana/"

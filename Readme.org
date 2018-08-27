@@ -81,9 +81,24 @@ helm init --service-account tiller
 helm init --service-account tiller --upgrade
 #+END_SRC
 
+** Prometheus
+
+- [[https://medium.com/@timfpark/simple-kubernetes-cluster-monitoring-with-prometheus-and-grafana-dd27edb1641][simple tuto]]
+- [[https://stackoverflow.com/questions/34282704/can-a-pvc-be-bound-to-a-specific-pv][bind pv to a specific pvc]]
+
+** Grafana
+
+- [[https://stackoverflow.com/questions/34282704/can-a-pvc-be-bound-to-a-specific-pv][bind pv to a specific pvc]]
+- set rights for user 472:472 on pv directory =/data/grafana= otherwise grafana container dies when it can't create a subdirectory in it's volume :\
+
 * Notes
 
 Forward local port to push on distant docker registry with HTTP:
 #+BEGIN_SRC bash
 ssh -L <local-port>:<registry-ip>:<registry-port> <registry-host>
 #+END_SRC
+
+Misc
+- [[https://stackoverflow.com/questions/34282704/can-a-pvc-be-bound-to-a-specific-pv][bind pv to a specific pvc]]
+- [[https://stackoverflow.com/questions/39293441/needed-ports-for-kubernetes-cluster][ports used by clusters]]
+- [[https://github.com/jetstack/kube-lego][kube-lego]]
