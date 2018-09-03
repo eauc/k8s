@@ -46,6 +46,57 @@ Ubuntu 18.04 image
 - choose static IPv4 IP from =Perimetre d'exploitation= file
 
 Docker v18 since v17.03 recommended by kudeamin is not found in docker repos.
+** Master
+
+UFW config:
+- allow ssh from Amaris' public IP
+- allow k8s from Amaris' public IP
+- allow all from K8sNode
+- allow ssh from GitlabRunner
+#+BEGIN_SRC bash
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), deny (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+22                         ALLOW IN    <AmarisPublicIP>
+6443                       ALLOW IN    <AmarisPublicIP>
+Anywhere                   ALLOW IN    <K8sNode>
+22                         ALLOW IN    <GitlabRunner>
+#+END_SRC
+
+Docker config:
+- disable iptables manipulation, Docker does not respect UFW rules otherwise
+#+BEGIN_SRC bash
+$ cat /etc/docker/daemon.json
+{ "iptables": false }
+#+END_SRC
+
+** Node
+
+UFW config:
+- allow all from K8sMaster
+- allow dockerResgistry from GitlabRunner
+#+BEGIN_SRC bash
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), deny (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+Anywhere                   ALLOW IN    <K8sMaster>
+5000                       ALLOW IN    <GitlabRunner>
+#+END_SRC
+
+Docker config:
+- disable iptables manipulation, Docker does not respect UFW rules otherwise
+#+BEGIN_SRC bash
+$ cat /etc/docker/daemon.json
+{ "iptables": false }
+#+END_SRC
 
 ** Kudeadmin
 
@@ -85,15 +136,75 @@ helm init --service-account tiller --upgrade
 
 - [[https://medium.com/@timfpark/simple-kubernetes-cluster-monitoring-with-prometheus-and-grafana-dd27edb1641][simple tuto]]
 - [[https://stackoverflow.com/questions/34282704/can-a-pvc-be-bound-to-a-specific-pv][bind pv to a specific pvc]]
+- create a PV bound to the Prometheus chart PVC's name.
+
+Deployed with helm chart in =monitoring= namespace.
+#+BEGIN_SRC yaml
+rbac:
+  create: true
+server:
+  persistentVolume:
+    enabled: true
+    size: 8Gi
+serverFiles:
+  prometheus.yml:
+    scrape_configs:
+      - job_name: 'mon-compte-admin-master'
+        static_configs:
+          - targets:
+            - mon-compte-admin-master.default:3000
+        metrics_path: /monitoring/metrics
+#+END_SRC
 
 ** Grafana
 
 - [[https://stackoverflow.com/questions/34282704/can-a-pvc-be-bound-to-a-specific-pv][bind pv to a specific pvc]]
 - set rights for user 472:472 on pv directory =/data/grafana= otherwise grafana container dies when it can't create a subdirectory in it's volume :\
+- create a PV bound to the Grafana chart PVC's name.
+
+Deployed with helm chart in =monitoring namespace.
+#+BEGIN_SRC yaml
+rbac:
+  create: true
+serviceAccount:
+  create: true
+persistence:
+  enabled: true
+  size: 10Gi
+adminUser: admin
+adminPassword: "<strong password>"
+#+END_SRC
 
 ** Nginx-Ingress
 
-[[https://medium.com/@maninder.bindra/using-nginx-ingress-controller-to-restrict-access-by-ip-ip-whitelisting-for-a-service-deployed-to-bd5c86dc66d6]]
+- [[https://medium.com/@maninder.bindra/using-nginx-ingress-controller-to-restrict-access-by-ip-ip-whitelisting-for-a-service-deployed-to-bd5c86dc66d6][whitelisting source ips]]
+
+ConfigMap:
+- restrict access to Amaris Public IP
+#+BEGIN_SRC yaml
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginx-ingress
+  namespace: ingress
+data:
+  whitelist-source-range: "<AmarisPublicIP>"
+#+END_SRC
+
+** Docker registry
+
+Run a docker registry on KubeNode.
+#+BEGIN_SRC bash
+docker run -d   -p 5000:5000   --restart=always   --name registry   -v /data/registry:/var/lib/registry   registry:2
+#+END_SRC
+
+Access to the registry is retricted by UFW's rules and the fact the Docker's daemon is configured not to inject IPTables, and thus respect the UFW rules.
+
+Hosts wanting to push on the registry should mount a SSH tunnel to KubeNode's port =5000=.
+Eg on GitlabRunner:
+#+BEGIN_SRC bash
+ssh -L 5000:<KubeNodeIP>:5000 localhost
+#+END_SRC
 
 * Notes
 
@@ -106,3 +217,6 @@ Misc
 - [[https://stackoverflow.com/questions/34282704/can-a-pvc-be-bound-to-a-specific-pv][bind pv to a specific pvc]]
 - [[https://stackoverflow.com/questions/39293441/needed-ports-for-kubernetes-cluster][ports used by clusters]]
 - [[https://github.com/jetstack/kube-lego][kube-lego]]
+- [[https://github.com/johanhaleby/kubetail][kubetail]]
+- [[https://github.com/dtan4/k8sec][k8sec]]
+- [[https://github.com/farmotive/kpoof][kpoof]]
