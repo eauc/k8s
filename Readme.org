@@ -69,10 +69,8 @@ Anywhere                   ALLOW IN    <K8sNode>
 
 Docker config:
 - disable iptables manipulation, Docker does not respect UFW rules otherwise
-#+BEGIN_SRC bash
-$ cat /etc/docker/daemon.json
-{ "iptables": false }
-#+END_SRC
+- configure json logger rotation, max 10Mo, max 3 files
+[[./docker/daemon.json][/etc/docker/daemon.json]]
 
 ** Node
 
