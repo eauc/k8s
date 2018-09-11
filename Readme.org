@@ -204,6 +204,20 @@ Eg on GitlabRunner:
 ssh -L 5000:<KubeNodeIP>:5000 localhost
 #+END_SRC
 
+** Users
+
+- [[https://kubernetes.io/docs/reference/access-authn-authz/authentication/][authentication in k8s]]
+- [[https://kubernetes.io/docs/reference/access-authn-authz/authorization/][autorization in k8s]]
+- [[https://docs.bitnami.com/kubernetes/how-to/configure-rbac-in-your-kubernetes-cluster/][RBAC configuration]]
+- [[https://stackoverflow.com/questions/42170380/how-to-add-users-to-kubernetes-kubectl]]
+
+The last link is the good one:
+- create key & CSR for user
+- use the cluster's CA (in =/etc/kubernetes/pki/ca.{crt,key}=) to create a certificate for the user
+- add the user's context and certificates to kubectl config (for certificate/key, use base64 strings to embed the files content in the config file)
+- create the role with the permission in the cluster
+- create the rolebinding, associated to user, in the cluster
+
 * Notes
 
 Forward local port to push on distant docker registry with HTTP:
