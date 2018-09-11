@@ -1,0 +1,13 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: reader-binding
+  namespace: default
+subjects:
+- kind: User
+  name: reader
+  apiGroup: ""
+roleRef:
+  kind: Role
+  name: reader
+  apiGroup: ""
