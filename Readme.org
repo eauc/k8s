@@ -1,6 +1,8 @@
 
 * Links
 
+- [[https://kubernetes.io/docs/reference/kubectl/cheatsheet/][kubectl cheatsheet]]
+
 Docker:
 - [[https://docs.docker.com/registry/][Registry]]
 
@@ -217,6 +219,51 @@ The last link is the good one:
 - add the user's context and certificates to kubectl config (for certificate/key, use base64 strings to embed the files content in the config file)
 - create the role with the permission in the cluster
 - create the rolebinding, associated to user, in the cluster
+
+* Archi
+
+#+BEGIN_SRC plantuml :file ./schemas/net_access.png :export results
+title k8s cluster network accesses
+
+actor "Dev 92.154.29.210" as Dev
+node "Master 145.239.59.98" as Master {
+  storage "Kube API https:6443" as Api
+  storage "Kube Controller" as Controller
+  storage "ssh kube-master" as MasterShell
+}
+node "Node 145.239.59.100" as Node {
+  storage "ssh kube-node" as NodeShell
+  storage DockerNode
+  storage Kubelet
+  cloud Pods
+  cloud "Ingress :30080\nwhitelist 92.154.29.210" as Ingress
+  database "Docker Registry http:5000" as Registry
+}
+node "GitlabRunner 145.239.59.109" as GitlabRunner {
+  storage Runner
+  storage DockerRunner
+}
+
+Dev -> MasterShell : ssh :22
+MasterShell -> NodeShell : ssh :22
+
+Dev -> Api : https :6443
+Api --> Controller
+Controller <--> Kubelet : :all
+Kubelet --> Pods
+Pods --> Registry
+Pods ~ DockerNode
+
+DockerRunner ~ Runner
+Runner -left-> Api : ssh :22
+Runner -> Registry : http/ssh :5000
+
+Dev -> Ingress : http :30080
+Ingress --> Pods : http :all
+#+END_SRC
+
+#+RESULTS:
+[[file:./schemas/net_access.png]]
 
 * Notes
 
