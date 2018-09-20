@@ -193,9 +193,9 @@ data:
 
 ** Docker registry
 
-Run a docker registry on KubeNode.
+Run a docker registry on KubeNode, with the https certificates provided by =let's encrypt=.
 #+BEGIN_SRC bash
-docker run -d   -p 5000:5000   --restart=always   --name registry   -v /data/registry:/var/lib/registry   registry:2
+docker run -d --restart=always --name registry  -v /data/registry:/var/lib/registry -v /etc/letsencrypt/archive/k8s.amaris.ovh:/certs:ro -e REGISTRY_HTTP_ADDR=0.0.0.0:5443 -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/fullchain1.pem -e REGISTRY_HTTP_TLS_KEY=/certs/privkey1.pem -p 5443:5443 registry:2
 #+END_SRC
 
 Access to the registry is retricted by UFW's rules and the fact the Docker's daemon is configured not to inject IPTables, and thus respect the UFW rules.
