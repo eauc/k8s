@@ -37,7 +37,7 @@ Packages with Helm
 Persistent volumes
 - [[https://docs.storageos.com/docs/introduction/overview][StorageOS]]
 
-* Installation notes
+* Installation/configuration notes
 
 ** VM configuration
 
@@ -219,6 +219,8 @@ The last link is the good one:
 - add the user's context and certificates to kubectl config (for certificate/key, use base64 strings to embed the files content in the config file)
 - create the role with the permission in the cluster
 - create the rolebinding, associated to user, in the cluster
+
+For persistent volumes, the user need a cluster role. See [[./users/ci-clusterrole.yml]]
 
 * Archi
 
