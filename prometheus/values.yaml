@@ -1050,7 +1050,7 @@ serverFiles:
         static_configs:
           - targets:
             - mon-compte-admin-master.default:3000
-        metrics_path: /monitoring/metrics
+       metrics_path: /mon-compte-admin/master/monitoring/metrics
 
 
 networkPolicy:
