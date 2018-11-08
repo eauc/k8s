@@ -39,6 +39,33 @@ Persistent volumes
 
 * Installation/configuration notes
 
+  The cluster uses multiple namespaces.
+
+  To run a command in a namespace, _prefix_ the =--namespace= argument= before the command.
+  #+BEGIN_SRC sh
+  kubectl --namespace=monitoring get pods
+  #+END_SRC
+
+  To run a command on all namespaces, _suffix_ the command with the =--all-namespace argument.
+  #+BEGIN_SRC sh
+  $ kubectl get pods --all-namespaces
+NAMESPACE     NAME                                                READY     STATUS    RESTARTS   AGE
+default       echoserver-9f757789d-qts8g                          1/1       Running   1          56d
+default       mon-compte-ldap2-94ccbf9d6-xsbmr                    1/1       Running   0          37d
+ingress       nginx-ingress-controller-7685c4f58b-xgg67           1/1       Running   8          72d
+ingress       nginx-ingress-default-backend-544cfb69fc-dvn42      1/1       Running   4          72d
+kube-system   calico-etcd-n8bxf                                   1/1       Running   6          72d
+kube-system   calico-kube-controllers-65945f849d-nb5n7            1/1       Running   8          72d
+  #+END_SRC
+
+  The namespaces at present:
+  - default (all CI app pods).
+  - ingress (NGinx ingress).
+  - kube-system (k8s components).
+  - monitoring.
+
+  Only the Admin credentials have access to all namespaces. Dev credential only have access to default.
+
 ** VM configuration
 
 - use =VM Network= for network adapter
@@ -134,11 +161,22 @@ helm init --service-account tiller --upgrade
 
 ** Prometheus
 
+Prometheus is deployed in the =monitoring= namespace.
+
 - [[https://medium.com/@timfpark/simple-kubernetes-cluster-monitoring-with-prometheus-and-grafana-dd27edb1641][simple tuto]]
 - [[https://stackoverflow.com/questions/34282704/can-a-pvc-be-bound-to-a-specific-pv][bind pv to a specific pvc]]
 - create a PV bound to the Prometheus chart PVC's name.
 
-Deployed with helm chart in =monitoring= namespace.
+The prometheus UI is not exposed on the cluster, you need to port-forward it on your locahost.
+#+BEGIN_SRC sh
+$ kubectl --namespace monitoring port-forward svc/prometheus-server 4444:80
+#+END_SRC
+
+Deployed with helm chart.
+
+You'll need to had new scrapers definitions in the chart like this :
+(TODO: find a way to configure scrapers endpoint with configmaps ?)
+
 #+BEGIN_SRC yaml
 rbac:
   create: true
@@ -158,11 +196,18 @@ serverFiles:
 
 ** Grafana
 
+Grafana is deployed in the =monitoring= namespace.
+
 - [[https://stackoverflow.com/questions/34282704/can-a-pvc-be-bound-to-a-specific-pv][bind pv to a specific pvc]]
 - set rights for user 472:472 on pv directory =/data/grafana= otherwise grafana container dies when it can't create a subdirectory in it's volume :\
 - create a PV bound to the Grafana chart PVC's name.
 
-Deployed with helm chart in =monitoring namespace.
+The grafana UI is not exposed on the cluster, you need to port-forward it on your locahost.
+#+BEGIN_SRC sh
+$ kubectl --namespace monitoring port-forward svc/grafana 4445:80
+#+END_SRC
+
+Deployed with helm chart.
 #+BEGIN_SRC yaml
 rbac:
   create: true
@@ -176,6 +221,8 @@ adminPassword: "<strong password>"
 #+END_SRC
 
 ** Nginx-Ingress
+
+Nginx is deployed in the =ingress= namespace.
 
 - [[https://medium.com/@maninder.bindra/using-nginx-ingress-controller-to-restrict-access-by-ip-ip-whitelisting-for-a-service-deployed-to-bd5c86dc66d6][whitelisting source ips]]
 
