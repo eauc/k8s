@@ -224,6 +224,8 @@ adminPassword: "<strong password>"
 
 Nginx is deployed in the =ingress= namespace.
 
+The ingress server is bound on the node on port =30080=.
+
 - [[https://medium.com/@maninder.bindra/using-nginx-ingress-controller-to-restrict-access-by-ip-ip-whitelisting-for-a-service-deployed-to-bd5c86dc66d6][whitelisting source ips]]
 
 ConfigMap:
@@ -271,7 +273,9 @@ For persistent volumes, the user need a cluster role. See [[./users/ci-clusterro
 
 * Archi
 
-#+BEGIN_SRC plantuml :file ./schemas/net_access.png :export results
+[[file:schemas/net_access.png]]
+
+#+BEGIN_SRC plantuml :file ./schemas/net_access.png :export none
 title k8s cluster network accesses
 
 actor "Dev 92.154.29.210" as Dev
@@ -311,10 +315,9 @@ Dev -> Ingress : http :30080
 Ingress --> Pods : http :all
 #+END_SRC
 
-#+RESULTS:
-[[file:./schemas/net_access.png]]
+* HowTo
 
-* Notes
+** Access a pod server from your machine
 
 Forward local port to push on distant docker registry with HTTP:
 #+BEGIN_SRC bash
@@ -328,3 +331,44 @@ Misc
 - [[https://github.com/johanhaleby/kubetail][kubetail]]
 - [[https://github.com/dtan4/k8sec][k8sec]]
 - [[https://github.com/farmotive/kpoof][kpoof]]
+
+** Find where your app is published
+
+  - read the =deploy.yml= config file in the app repos ! Find the services and ingress defined for your app. If this is not enough:
+  - look into the services configuration
+    #+BEGIN_SRC bash
+    $ kubectl get svc
+    NAME                            TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                       AGE
+    echoserver                      ClusterIP   10.108.242.133   <none>        80/TCP                        80d
+    kubernetes                      ClusterIP   10.96.0.1        <none>        443/TCP                       80d
+    mon-compte-admin-master         ClusterIP   10.101.45.223    <none>        3000/TCP                      79d
+    mon-compte-admin-proxy-master   NodePort    10.96.76.162     <none>        443:30447/TCP,444:30444/TCP   76d
+    mon-compte-admindb-master       ClusterIP   10.97.134.211    <none>        27017/TCP                     78d
+    mon-compte-adminui-master       ClusterIP   10.108.239.193   <none>        80/TCP                        7d
+    mon-compte-connector-master     NodePort    10.102.79.5      <none>        7843:30445/TCP                72d
+    mon-compte-ldap1                ClusterIP   10.101.53.90     <none>        636/TCP                       73d
+    mon-compte-ldap2                ClusterIP   10.107.87.243    <none>        636/TCP                       73d
+    #+END_SRC
+    -> if your service is a =NodePort= with a direct binding on the machine like =443:30447/TCP= above, you've found your information.
+  - otherwise, your app is probably published on ingress on port =30080=. You just need to find your ingress rule:
+    #+BEGIN_SRC bash
+    $ kubectl get ingress
+    NAME                        HOSTS     ADDRESS   PORTS     AGE
+    echoserver                  *                   80        80d
+    mon-compte-admin-master     *                   80        79d
+    mon-compte-adminui-master   *                   80        7d
+    #+END_SRC
+    once you've found the service for your app, you can ask for its description:
+    #+BEGIN_SRC bash
+    $ kubectl describe ingress mon-compte-admin-master
+    Name:             mon-compte-admin-master
+    Namespace:        default
+    Address:          
+    Default backend:  default-http-backend:80 (<none>)
+    Rules:
+      Host  Path  Backends
+      ----  ----  --------
+      ,*     
+            /mon-compte-admin/master   mon-compte-admin-master:3000 (<none>)
+    #+END_SRC
+    So here we can see that the app is accessible on =http://<kube-node>:30080/mon-compte-admin/master= url.
